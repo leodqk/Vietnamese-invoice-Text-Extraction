@@ -1,0 +1,15 @@
+pyyaml>=5.1
+tensorboard
+pycocotools
+pyclipper
+Polygon3
+colorlog
+ocrd-fork-pylsd
+einops
+prefetch_generator
+imgaug
+lmdb
+transformers
+torchnet
+webcolors
+pandas_profiling
