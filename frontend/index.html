@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnamese OCR Toolbox</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-eye"></i> Vietnamese OCR Toolbox</h1>
+            <p>Trích xuất văn bản tiếng Việt từ hình ảnh</p>
+        </header>
+
+        <!-- Health Status - Hidden to prevent reload issues -->
+        <!-- <div id="health-status" class="health-status">
+            <i class="fas fa-spinner fa-spin"></i> Đang kiểm tra trạng thái server...
+        </div> -->
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="upload-area">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Upload Hình Ảnh</h3>
+                <p>Kéo thả file vào đây hoặc click để chọn</p>
+                <input type="file" id="file-input" accept="image/*" hidden>
+                <button type="button" class="btn-primary" id="choose-file-btn">
+                    <i class="fas fa-folder-open"></i> Chọn File
+                </button>
+            </div>
+            
+            <div id="file-info" class="file-info" style="display: none;">
+                <div class="file-preview">
+                    <img id="preview-image" src="" alt="Preview">
+                    <div class="file-details">
+                        <h4 id="file-name"></h4>
+                        <p id="file-size"></p>
+                        <p id="file-dimensions"></p>
+                        <p class="file-id">File ID: <span id="file-id"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Method Selection -->
+        <div class="method-section" id="method-section" style="display: none;">
+            <h3><i class="fas fa-cogs"></i> Chọn Phương Pháp Trích Xuất</h3>
+            
+            <div class="method-options">
+                <div class="method-card">
+                    <input type="radio" id="normal-method" name="method" value="normal" checked>
+                    <label for="normal-method">
+                        <div class="method-header">
+                            <i class="fas fa-text-width"></i>
+                            <h4>Normal Method</h4>
+                        </div>
+                        <p>Phương pháp truyền thống với khả năng tùy chỉnh cao</p>
+                        <div class="method-features">
+                            <span class="feature">✓ Lưu tọa độ</span>
+                            <span class="feature">✓ Trích xuất cấu trúc</span>
+                            <span class="feature">✓ Tìm góc xoay tối ưu</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="method-card">
+                    <input type="radio" id="advance-method" name="method" value="advance">
+                    <label for="advance-method">
+                        <div class="method-header">
+                            <i class="fas fa-brain"></i>
+                            <h4>Advance Method</h4>
+                        </div>
+                        <p>Phương pháp AI tiên tiến với độ chính xác cao</p>
+                        <div class="method-features">
+                            <span class="feature">✓ AI-powered</span>
+                            <span class="feature">✓ Custom prompt</span>
+                            <span class="feature">✓ Hiệu suất cao</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Normal Method Options -->
+            <div id="normal-options" class="options-panel">
+                <h4><i class="fas fa-sliders-h"></i> Tùy Chọn Normal Method</h4>
+                <div class="checkbox-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="save-coordinates">
+                        <span class="checkmark"></span>
+                        Lưu tọa độ bounding box
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="do-retrieve">
+                        <span class="checkmark"></span>
+                        Trích xuất thông tin cấu trúc
+                    </label>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="find-best-rotation">
+                        <span class="checkmark"></span>
+                        Tìm góc xoay tối ưu
+                    </label>
+                </div>
+            </div>
+
+            <!-- Advance Method Options -->
+            <div id="advance-options" class="options-panel" style="display: none;">
+                <h4><i class="fas fa-comment-alt"></i> Tùy Chọn Advance Method</h4>
+                <div class="input-group">
+                    <label for="custom-prompt">Custom Prompt (tùy chọn):</label>
+                    <textarea 
+                        id="custom-prompt" 
+                        placeholder="Nhập prompt tùy chỉnh để hướng dẫn AI trích xuất thông tin cụ thể..."
+                        rows="3">
+                    </textarea>
+                    <small>Ví dụ: "Trích xuất thông tin hóa đơn: số hóa đơn, ngày, khách hàng, tổng tiền"</small>
+                </div>
+            </div>
+
+            <button type="button" class="btn-success btn-large" id="extract-btn">
+                <i class="fas fa-magic"></i> Trích Xuất Văn Bản
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section" style="display: none;">
+            <h3><i class="fas fa-file-alt"></i> Kết Quả Trích Xuất</h3>
+            
+            <div class="result-info">
+                <div class="info-item">
+                    <span class="label">Phương pháp:</span>
+                    <span id="result-method"></span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Thời gian xử lý:</span>
+                    <span id="processing-time"></span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Kích thước file:</span>
+                    <span id="result-file-size"></span>
+                </div>
+            </div>
+
+            <div class="result-content">
+                <div class="result-tabs">
+                    <button type="button" class="tab-btn active" data-tab="text">
+                        <i class="fas fa-align-left"></i> Văn Bản
+                    </button>
+                    <button type="button" class="tab-btn" data-tab="coordinates" id="coordinates-tab" style="display: none;">
+                        <i class="fas fa-map-marker-alt"></i> Tọa Độ
+                    </button>
+                    <button type="button" class="tab-btn" data-tab="retrieval" id="retrieval-tab" style="display: none;">
+                        <i class="fas fa-search"></i> Thông Tin Cấu Trúc
+                    </button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="text-content" class="tab-panel active">
+                        <div class="content-header">
+                            <h4>Văn Bản Được Trích Xuất</h4>
+                            <button type="button" class="btn-copy" data-copy-target="extracted-text">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <textarea id="extracted-text" readonly></textarea>
+                    </div>
+
+                    <div id="coordinates-content" class="tab-panel">
+                        <div class="content-header">
+                            <h4>Tọa Độ Bounding Box</h4>
+                            <button type="button" class="btn-copy" data-copy-target="coordinates-data">
+                                <i class="fas fa-copy"></i> Copy JSON
+                            </button>
+                        </div>
+                        <pre id="coordinates-data"></pre>
+                    </div>
+
+                    <div id="retrieval-content" class="tab-panel">
+                        <div class="content-header">
+                            <h4>Thông Tin Cấu Trúc</h4>
+                            <button type="button" class="btn-copy" data-copy-target="retrieval-data">
+                                <i class="fas fa-copy"></i> Copy JSON
+                            </button>
+                        </div>
+                        <pre id="retrieval-data"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button type="button" class="btn-primary" id="reset-btn">
+                    <i class="fas fa-redo"></i> Xử Lý Ảnh Mới
+                </button>
+                <button type="button" class="btn-secondary" id="cleanup-btn">
+                    <i class="fas fa-trash"></i> Dọn Dẹp File
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3>Đang xử lý...</h3>
+                <p id="loading-message">Vui lòng đợi trong giây lát</p>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
